@@ -28,13 +28,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     //Metodo para carregar os dados async
     fun load(){
-        CoroutineScope(Dispatchers.IO).launch {
-            val res = CEPApi.loadCEP(this@MainViewModel.getApplication<Application>().applicationContext)?.await()
-            val cep = Gson().fromJson(res, Address::class.java)
-
-            withContext(Dispatchers.Main){
-                this@MainViewModel.cep.value = cep
-            }
+        CoroutineScope(Dispatchers.Main).launch {
+            val cepResult = Gson()
+            .fromJson(
+                withContext(Dispatchers.Default){
+                    CEPApi.loadCEP(this@MainViewModel.getApplication<Application>().applicationContext)
+                }
+                ,Address::class.java)
+            
+            cep.value = cepResult
         }
     }
 }
